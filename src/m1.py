@@ -101,12 +101,11 @@ class CircleChanger(object):
         # the SPECIFICATION of the method.  That is why you read the
         # TEST function before implementing the method that it tests.
         ################################################################
-        self.x = x
-        self.y = y
-        self.center = rg.Point(x, y)
-        self.circle = rg.Circle(self.center, radius)
+        self.circle = rg.Circle(rg.Point(x, y), radius)
         self.circle.fill_color = fill_color
-
+        self.original_color = fill_color
+        self.colors = colors
+        self.color_index = 0
 
     def __repr__(self):
         """
@@ -198,7 +197,7 @@ class CircleChanger(object):
             :type point: rg.Point
         """
         ################################################################
-        # TODO: 3.
+        # DONE: 3.
         #   First, READ the doc-string (specification) above.
         #   Second, READ the   run_test_get_distance_from   function
         #   (below).  Third, implement and test this method.
@@ -207,6 +206,8 @@ class CircleChanger(object):
         #   of the    rg.Point     class to compute this distance.
         #   NO CREDIT if you use the distance formula here.
         ################################################################
+        distance = point.get_distance_from(self.circle.center)
+        return distance
 
     def swell_or_shrink_once(self, amount_to_swell_or_shrink):
         """
@@ -243,7 +244,7 @@ class CircleChanger(object):
             :type amount_to_swell_or_shrink: int
         """
         ################################################################
-        # TODO: 4.
+        # DONE: 4.
         #   First, READ the doc-string (specification) above.
         #   Second, READ the   run_test_swell_or_shrink_once   function
         #   (below).  Third, implement and test this method.
@@ -271,6 +272,11 @@ class CircleChanger(object):
         #   Simply   ** ASK FOR HELP **
         #            if this does not make sense to you.
         ################################################################
+        self.circle.radius += amount_to_swell_or_shrink
+        if self.circle.radius < 1:
+            self.circle.radius = 1
+        self.circle.outline_thickness = random.randrange(3, 16)
+        self.circle.fill_color = self.colors[random.randrange(0, len(self.colors))]
 
     def swell_or_shrink_repeatedly(self,
                                    amount_to_swell_or_shrink,
@@ -325,11 +331,16 @@ class CircleChanger(object):
             :type times_to_swell_or_shrink:  int
         """
         ################################################################
-        # TODO: 5.
+        # DONE: 5.
         #   First, READ the doc-string (specification) above.
         #   Second, READ the  run_test_swell_or_shrink_repeatedly  function
         #   (below).  Third, implement and test this method.
         ################################################################
+        for k in range(times_to_swell_or_shrink):
+            self.swell_or_shrink_once(amount_to_swell_or_shrink)
+            self.draw()
+            self.swell_or_shrink_once(-amount_to_swell_or_shrink)
+            self.draw()
 
     def swallow(self, other_circle_changer):
         """
@@ -357,7 +368,7 @@ class CircleChanger(object):
             :rtype CircleChanger
         """
         ################################################################
-        # TODO: 6.
+        # DONE: 6.
         #   First, READ the doc-string (specification) above.
         #   Second, READ the   run_test_swallow   function (below).
         #   Third, implement and test this method.
@@ -367,6 +378,12 @@ class CircleChanger(object):
         #   the center and radius of the new CircleChanger.
         #   NO CREDIT if you use the distance formula here.
         ################################################################
+        center1 = self.circle.center
+        center2 = other_circle_changer.circle.center
+        new_center = center1.halfway_to(center2)
+        radius = center2.get_distance_from(center1)/2
+        colors = self.colors + other_circle_changer.colors
+        return CircleChanger(new_center.x, new_center.y, radius, "red", colors)
 
     def change_color(self, index_of_color):
         """
@@ -388,11 +405,12 @@ class CircleChanger(object):
             :type index_of_color: int
         """
         ################################################################
-        # TODO: 7.
+        # DONE: 7.
         #   First, READ the doc-string (specification) above.
         #   Second, READ the   run_test_change_color   function (below).
         #   Third, implement and test this method.
         ################################################################
+        self.circle.fill_color = self.colors[index_of_color]
 
     def change_to_original_color(self):
         """
@@ -405,11 +423,12 @@ class CircleChanger(object):
                was constructed.
         """
         ################################################################
-        # TODO: 8.
+        # DONE: 8.
         #   First, READ the doc-string (specification) above.
         #   Second, READ the   run_test_change_to_original_color   function
         #   (below).  Third, implement and test this method.
         ################################################################
+        self.circle.fill_color = self.original_color
 
     def change_to_next_color_in_tuple(self):
         """
@@ -444,11 +463,15 @@ class CircleChanger(object):
         fill color have no effect on or interaction with this method.
         """
         ################################################################
-        # TODO: 9.
+        # DONE: 9.
         #   First, READ the doc-string (specification) above.
         #   Second, READ the   run_test_change_to_next_color_in_tuple
         #   function (below).  Third, implement and test this method.
         ################################################################
+        self.circle.fill_color = self.colors[self.color_index]
+        self.color_index += 1
+        if self.color_index >= len(self.colors):
+            self.color_index = 0
 
 
 ########################################################################
